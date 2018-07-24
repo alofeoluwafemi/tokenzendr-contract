@@ -29,7 +29,7 @@ contract TokenZendR is Ownable, Pausable {
     /**
     * @dev a list of all transfers successful or unsuccessful
     */
-    Transfer[] transactions;
+    Transfer[] public transactions;
 
     address public owner;
 
