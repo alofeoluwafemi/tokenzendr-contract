@@ -16,3 +16,8 @@ truffle(development)> compile
 
 truffle(development)> migrate --reset
 ```
+
+You can use ![the Ganache-CLI](https://github.com/trufflesuite/ganache-cli) to spin up your own blockchain to test your installation with the command
+```ganache-cli -b 2
+```
+It will start a blockchain on your localhost on port 8454
