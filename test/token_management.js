@@ -1,36 +1,38 @@
 const TokenZendR = artifacts.require('./TokenZendR.sol');
+require('dotenv').config();
 
 const should = require('chai')
     .use(require('chai-as-promised'))
     .should();
 
 let sender;
-
+// Error: invalid arrayify value (argument="value", value="OPEN000000000000000000000000000000000000000000000000000000000000", code=INVALID_ARGUMENT, version=bytes/5.0.5)
+//Error: Timeout of 120000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (D:\ERC\onchain\test\token_transfer.js)
 contract('token_management', async (accounts) => {
 
     beforeEach(async () => {
         sender = await TokenZendR.new();
-        await sender.addNewToken('OPEN', '0x69c4bb240cf05d51eeab6985bab35527d04a8c64');
+        await sender.addNewToken(web3.utils.fromAscii("OPEN"), process.env.CUB_ADDRESS);
     });
 
     it("should add new supported token", async() => {
-        let address = await sender.tokens.call('OPEN');
+        let address = await sender.tokens.call(web3.utils.fromAscii("OPEN"));
 
-        address.should.equal('0x69c4bb240cf05d51eeab6985bab35527d04a8c64');
+        address.should.equal(process.env.CUB_ADDRESS);
     });
 
     it("should update supported token address", async() => {
-        await sender.addNewToken('OPEN', '0x3472059945ee170660a9a97892a3cf77857eba3a');
+        await sender.addNewToken(web3.utils.fromAscii("OPEN"), process.env.BEAR_ADDRESS);
 
-        let address = await sender.tokens.call('OPEN');
+        let address = await sender.tokens.call(web3.utils.fromAscii("OPEN"));
 
-        address.should.equal('0x3472059945ee170660a9a97892a3cf77857eba3a');
+        address.should.equal(process.env.BEAR_ADDRESS);
     });
 
     it("should remove unused supported token address", async() => {
-        await sender.removeToken('OPEN');
+        await sender.removeToken(web3.utils.fromAscii("OPEN"));
 
-        let address = await sender.tokens.call('OPEN');
+        let address = await sender.tokens.call(web3.utils.fromAscii("OPEN"));
 
         address.should.equal('0x0000000000000000000000000000000000000000');
     });

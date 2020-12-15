@@ -1,7 +1,8 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.7.0;
 
-import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import "openzeppelin-solidity/contracts/lifecycle/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
 contract TokenZendR is Ownable, Pausable {
 
@@ -31,12 +32,10 @@ contract TokenZendR is Ownable, Pausable {
     */
     Transfer[] public transactions;
 
-    address public owner;
-
     /**
     * @dev list of all supported tokens for transfer
-    * @param string token symbol
-    * @param address contract address of token
+    *  string token symbol
+    *  address contract address of token
     */
     mapping(bytes32 => address) public tokens;
 
@@ -50,8 +49,7 @@ contract TokenZendR is Ownable, Pausable {
 
     event TransferFailed(address indexed from_, address indexed to_, uint256 amount_);
 
-    constructor() public {
-        owner = msg.sender;
+    constructor() Ownable()  {
     }
 
     /**
@@ -68,7 +66,7 @@ contract TokenZendR is Ownable, Pausable {
     * @dev remove address of token we no more support
     */
     function removeToken(bytes32 symbol_) public onlyOwner returns (bool) {
-        require(tokens[symbol_] != 0x0);
+        require(tokens[symbol_] != address(0));
 
         delete(tokens[symbol_]);
 
@@ -84,7 +82,7 @@ contract TokenZendR is Ownable, Pausable {
     * @param amount_ numbers of token to transfer
     */
     function transferTokens(bytes32 symbol_, address to_, uint256 amount_) public whenNotPaused{
-        require(tokens[symbol_] != 0x0);
+        require(tokens[symbol_] != address(0));
         require(amount_ > 0);
 
         address contract_ = tokens[symbol_];
@@ -92,7 +90,7 @@ contract TokenZendR is Ownable, Pausable {
 
         ERC20Interface =  ERC20(contract_);
 
-        uint256 transactionId = transactions.push(
+        transactions.push(
             Transfer({
             contract_:  contract_,
             to_: to_,
@@ -100,7 +98,7 @@ contract TokenZendR is Ownable, Pausable {
             failed_: true
             })
         );
-
+        uint256 transactionId = transactions.length;
         transactionIndexesToSender[from_].push(transactionId - 1);
 
         if(amount_ > ERC20Interface.allowance(from_, address(this))) {
@@ -118,13 +116,15 @@ contract TokenZendR is Ownable, Pausable {
     /**
     * @dev allow contract to receive funds
     */
-    function() public payable {}
-
+    event Received(address, uint);
+    receive() external payable {
+        emit Received(msg.sender, msg.value);
+    }
     /**
     * @dev withdraw funds from this contract
     * @param beneficiary address to receive ether
     */
-    function withdraw(address beneficiary) public payable onlyOwner whenNotPaused {
+    function withdraw(address payable beneficiary) public payable onlyOwner whenNotPaused {
         beneficiary.transfer(address(this).balance);
     }
 }
