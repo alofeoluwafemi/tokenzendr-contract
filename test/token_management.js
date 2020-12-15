@@ -6,8 +6,6 @@ const should = require('chai')
     .should();
 
 let sender;
-// Error: invalid arrayify value (argument="value", value="OPEN000000000000000000000000000000000000000000000000000000000000", code=INVALID_ARGUMENT, version=bytes/5.0.5)
-//Error: Timeout of 120000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves. (D:\ERC\onchain\test\token_transfer.js)
 contract('token_management', async (accounts) => {
 
     beforeEach(async () => {
